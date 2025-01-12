@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ensure the backend directory exists
 echo "Ensuring the backend directory exists..."
-sudo mkdir -p /srv/react-node-mysql-app/backend
+sudo mkdir -p /srv/react-node-mysql-app/backend/
 echo "Backend directory is ready at /srv/react-node-mysql-app/backend"
 # Clear all files and hidden files in the backend directory
 echo "Clearing all files and hidden files in the backend directory..."
