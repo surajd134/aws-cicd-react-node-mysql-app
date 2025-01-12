@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
-const host = process.env.DB_HOST || 'localhost';
+const host = process.env.DB_HOST || 'dev-db-instance.cdbmlufgqkjd.ap-south-1.rds.amazonaws.com';
 const port = process.env.DB_PORT || '3306';
-const user = process.env.DB_USER || 'root';
-const password = process.env.DB_PASSWORD || '12345678';
+const user = process.env.DB_USER || 'admin';
+const password = process.env.DB_PASSWORD || 'root123456';
 const database = process.env.DB_NAME || 'react_node_app';
 
 const db = mysql.createConnection({
