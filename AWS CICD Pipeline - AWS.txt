@@ -98,15 +98,20 @@ appsec.yml is typically used for application related, install, move, copy etc in
 
    TE = CodeBuild 
    Permissions = AmazonS3FullAccess(for artifacts), AWSCodeBuildAdminAccess, AmazonSSMReadOnlyAccess(for paramter-store to store creds) , Cloudwatchlogsfullaccess
+      or admimn access
    Name = 3-tier-codebuild-role
 
 --> For AWS-CodeDeploy
 
    TE = CodeDeploy
    Permissions = AWScodedeployrole ,  CloudWatchLogsFullAccess, CloudWatchAgentServerPolicy
+                  or Admin access
    Name = 3-tier-codedeploy-role
 
-
+--> For AWS-CodePipeline
+TE = CodePipeline
+Permissions = Admin
+Name = 3-tier-Codepipeline-role
 4. Create RDS instance - MySQL
 ===============================
 
@@ -200,7 +205,7 @@ Password = root123456
         Attach to existing LB = Select TG- app-tier-tg
 	Turn on Elastic Load Balancing health checks
 	DC = 2, Min=1, Max = 4
-	Target tracking scaling policy = Avg CPU = Target value = 50%
+	Target tracking scaling policy = Avg CPU = Target value = 70%
 	Monitoring= Enable group metrics collection within CloudWatch.
 
 7. Setup Web/Presentation Tier 
@@ -219,7 +224,9 @@ Password = root123456
     Key-Pair =
     SG = web-SG
     Instance role = 3-tier-ec2-role
-    user-data = copy paste the notepad(web-tier-user-data) user-data script [Modify user-data with internal alb and CNAME]
+   NOTE: [Modify user-data with internal alb and CNAME]
+    user-data = copy paste the notepad(web-tier-user-data) user-data script
+
 
 --> Create Empty Target Group
     
@@ -250,7 +257,7 @@ Password = root123456
         Attach to existing LB = Select TG- web-tier-tg
 	Turn on Elastic Load Balancing health checks
 	DC = 2, Min=1, Max = 4
-	Target tracking scaling policy = Avg CPU = Target value = 50%
+	Target tracking scaling policy = Avg CPU = Target value = 70%
 	Monitoring= Enable group metrics collection within CloudWatch.
 
 Check now External Load Balancer DNS name in browser , you should see nginx page
@@ -318,6 +325,8 @@ Navigate to Systems Manager --> Parameter stores
 
 10: Setup CI / CD for the Project: Configuring CodeBuild for Application Tier
 =============================================================================
+
+First Setup Connection to github from CodePipeline Connections
 
 Navigate to CodeBuild
 
