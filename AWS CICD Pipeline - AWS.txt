@@ -374,7 +374,7 @@ Navigate to CodePipeline --> Create Pipeline
 	Advance setting --> Custom location --> Bucket --> 3-tier-project-codebuild-artifacts
 	Source = GitHub Version 2 / GitHub app
 	Connection = githubconnection
-	Repository name = ReyazShaik/3tier-app-deployment-aws
+	Repository name = ReyazShaik/aws-cicd-react-node-mysql-app
 	Branch = main
 	Webhook events = Add filters --> Push , Branch = main
 	Build = other providers =  CodeBuild
@@ -444,7 +444,7 @@ Navigate to CodePipeline --> Create Pipeline
 	Advance setting --> Custom location --> Bucket --> 3-tier-project-codebuild-artifacts
 	Source = GitHub Version 2 / GitHub app
 	Connection = githubconnection
-	Repository name = ReyazShaik/3tier-app-deployment-aws
+	Repository name = ReyazShaik/aws-cicd-react-node-mysql-app
 	Branch = main
 	Webhook events = Add filters --> Push , Branch = main
 	Build = other providers =  CodeBuild
