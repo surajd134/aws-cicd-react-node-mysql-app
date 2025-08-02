@@ -1,12 +1,10 @@
 
 AWS CI/CD Pipeline | Deploy Production-Grade Full-Stack App | CodeBuild, CodeDeploy, CodePipeline
 =================================================================================================
-
-
 1 Create own VPC
 2.Create Security Groups
 3.Create S3 Bucket for code
-4.Create IAM ROLE
+4.Create IAM ROLES
 5.Create RDS MySQL
 6.Create App Server and setup application 
 7.Create Internal Load Balancer for App Servers
@@ -82,7 +80,7 @@ appsec.yml is typically used for application related, install, move, copy etc in
     Create Database-SG - Inbound MySQL, Custom  = Allow from App-SG or 192.168.0.0/16. we are giving access to entire vpc traffic
                          Inbound MySQL, Custom = Bastion-SG
     
-2. Launching Bastion Host - RedHat- Public Subnet, and Bastion-SG
+2. Launching Bastion Host - Amazon Linux 2023-Public Subnet, and Bastion-SG
 =======================================================
 
 
@@ -92,26 +90,26 @@ appsec.yml is typically used for application related, install, move, copy etc in
 --> For EC2  
 
    TE = EC2, 
-   Permissions = CloudWatchLogsFullAccess, CloudWatchAgentServerPolicy, AmazonEC2RoleforAWSCodeDeploy, Name = 3-tier-ec2-role
+   Permissions = CloudWatchLogsFullAccess, CloudWatchAgentServerPolicy, AmazonEC2RoleforAWSCodeDeploy, 
+   Name = 3-tier-ec2-role
 
 --> For AWS-CodeBuild 
 
    TE = CodeBuild 
    Permissions = AmazonS3FullAccess(for artifacts), AWSCodeBuildAdminAccess, AmazonSSMReadOnlyAccess(for paramter-store to store creds) , Cloudwatchlogsfullaccess
-      or admimn access
    Name = 3-tier-codebuild-role
 
 --> For AWS-CodeDeploy
 
    TE = CodeDeploy
    Permissions = AWScodedeployrole ,  CloudWatchLogsFullAccess, CloudWatchAgentServerPolicy
-                  or Admin access
    Name = 3-tier-codedeploy-role
 
 --> For AWS-CodePipeline
-TE = CodePipeline
-Permissions = Admin
-Name = 3-tier-Codepipeline-role
+    TE = CodePipeline
+    Permissions= Admin
+    Name = 3-tier-codepipeline-role
+
 4. Create RDS instance - MySQL
 ===============================
 
@@ -134,12 +132,13 @@ Name = 3-tier-Codepipeline-role
   Security Group = Database-SG
   Sample DB = NO
   Backups = NO [will create fastly]
+  Encryption = yes
 
 Endpoint = dev-db-instance.cdbmlufgqkjd.ap-south-1.rds.amazonaws.com
 Username = admin
 Password = root123456
    
-5. Connect to Bastion through putty or MobaXterm and setup databases and tables
+5. Connect to Bastion through MobaXterm and setup databases and tables
 =============================================================================
 
     sudo -s
@@ -147,7 +146,7 @@ Password = root123456
 
     install MySQL Client
      ----------------------
-    sudo yum install mysql -y 
+    sudo dnf install mariadb105 -y
 
     Connect to the RDS database and create databases
     --------------------------------------------------------
@@ -205,7 +204,7 @@ Password = root123456
         Attach to existing LB = Select TG- app-tier-tg
 	Turn on Elastic Load Balancing health checks
 	DC = 2, Min=1, Max = 4
-	Target tracking scaling policy = Avg CPU = Target value = 70%
+	Target tracking scaling policy = Avg CPU = Target value = 50%
 	Monitoring= Enable group metrics collection within CloudWatch.
 
 7. Setup Web/Presentation Tier 
@@ -217,16 +216,14 @@ Password = root123456
    Create Auto-Scaling Group 
 
 --> Create Launch template
-    Name = web-tier-ASG
+    Name = web-tier-LT
     Auto Scaling guidance = Check
     AMI = Amazon Linux 2023
     Type = t2.micro
     Key-Pair =
     SG = web-SG
     Instance role = 3-tier-ec2-role
-   NOTE: [Modify user-data with internal alb and CNAME]
-    user-data = copy paste the notepad(web-tier-user-data) user-data script
-
+    user-data = copy paste the notepad(web-tier-user-data) user-data script [Modify user-data with internal alb and CNAME] Note: use http://elbdnsname
 
 --> Create Empty Target Group
     
@@ -242,7 +239,7 @@ Password = root123456
 --> Now Create External ALB
 
 	Name = web-tier-external-alb
-	Scheme = external
+	Scheme = InternetFacing
 	VPC = 3-tier-vpc-project
 	AZ = 1a = PublicSubnet-1a
 	AZ = 1b = PublicSubnet-1b
@@ -257,7 +254,7 @@ Password = root123456
         Attach to existing LB = Select TG- web-tier-tg
 	Turn on Elastic Load Balancing health checks
 	DC = 2, Min=1, Max = 4
-	Target tracking scaling policy = Avg CPU = Target value = 70%
+	Target tracking scaling policy = Avg CPU = Target value = 50%
 	Monitoring= Enable group metrics collection within CloudWatch.
 
 Check now External Load Balancer DNS name in browser , you should see nginx page
@@ -326,8 +323,6 @@ Navigate to Systems Manager --> Parameter stores
 10: Setup CI / CD for the Project: Configuring CodeBuild for Application Tier
 =============================================================================
 
-First Setup Connection to github from CodePipeline Connections
-
 Navigate to CodeBuild
 
 	Create Project
@@ -383,7 +378,7 @@ Navigate to CodePipeline --> Create Pipeline
 	Advance setting --> Custom location --> Bucket --> 3-tier-project-codebuild-artifacts
 	Source = GitHub Version 2 / GitHub app
 	Connection = githubconnection
-	Repository name = ReyazShaik/aws-cicd-react-node-mysql-app
+	Repository name = ReyazShaik/3tier-app-deployment-aws
 	Branch = main
 	Webhook events = Add filters --> Push , Branch = main
 	Build = other providers =  CodeBuild
@@ -453,7 +448,7 @@ Navigate to CodePipeline --> Create Pipeline
 	Advance setting --> Custom location --> Bucket --> 3-tier-project-codebuild-artifacts
 	Source = GitHub Version 2 / GitHub app
 	Connection = githubconnection
-	Repository name = ReyazShaik/aws-cicd-react-node-mysql-app
+	Repository name = ReyazShaik/3tier-app-deployment-aws
 	Branch = main
 	Webhook events = Add filters --> Push , Branch = main
 	Build = other providers =  CodeBuild
